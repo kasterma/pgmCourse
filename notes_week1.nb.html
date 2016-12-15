@@ -172,9 +172,69 @@ $(document).ready(function () {
 
 
 <!-- rnb-text-begin -->
+<div id="overview-conditional-probability-queries" class="section level1">
+<h1>Overview: Conditional Probability Queries</h1>
+<ul>
+<li>Evidence: <span class="math inline">\(E = e\)</span></li>
+<li>Query: a subset of variables <span class="math inline">\(Y\)</span></li>
+<li>Tasks: compute <span class="math inline">\(P(Y \mid E = e)\)</span></li>
+</ul>
+<p>NP-hard problems:</p>
+<ul>
+<li>Given a PGM <span class="math inline">\(P_\phi\)</span>, a variable <span class="math inline">\(X\)</span> and a value <span class="math inline">\(x \in Val(X)\)</span>, compute <span class="math inline">\(P_\phi(X = x)\)</span> (i.e. computing an exact probability for a simple event).</li>
+<li>Or even decide if <span class="math inline">\(P_\phi(X = x) &gt; 0\)</span>.</li>
+<li>Same happens with many versions of approximation.</li>
+</ul>
+<p>In many cases one can effecciently get results.</p>
+<p>Sum-Product for <span class="math inline">\(P(Y \mid E = e)\)</span>: sum over product of factors to get a marginal distribution. For incorporating the evidence; first reduce the factors. Can renormalize at the end, so no need to incorporate partition fn at start.</p>
+<p>Push summations into factor product:</p>
+<ul>
+<li>variable elimination (dynamic programming)</li>
+</ul>
+<p>Message passing over a graph</p>
+<ul>
+<li>belief propagation</li>
+<li>variational approximations</li>
+</ul>
+<p>Random sampling instantiations</p>
+<ul>
+<li>MCMC</li>
+<li>Importance sampling</li>
+</ul>
+</div>
+<div id="overview-map-inference" class="section level1">
+<h1>Overview: MAP Inference</h1>
+<p>Maximum a Posteriori</p>
+<ul>
+<li>Evidence: <span class="math inline">\(E = e\)</span></li>
+<li>Query: <em>all</em> other variables <span class="math inline">\(Y = \{X_1, \ldots, X_n\} - E\)</span></li>
+<li>Taks: compute <span class="math inline">\(MAP(Y \mid E = e)\)</span>. Note that there may be more than one possible solution.</li>
+</ul>
+<p>Not equal to the maximum stepwise reached by maximising marginals.</p>
+<p>NP-hard problems:</p>
+<ul>
+<li>Given a PGM find the joint assignment with the highest probability.</li>
+<li>Find an assignment exceeding a given probability.</li>
+</ul>
+<p>In many cases one can efficiently get results.</p>
+<p>Max-Product for <span class="math inline">\(MAP(Y \mid E = e)\)</span>; denominator for normalizing w.r.t. evidence is constant, so can leave it out. Just work with reduced factors. Also can leave out the partition function again.</p>
+<ul>
+<li>Push maximization into factor product
+<ul>
+<li>variable elimination</li>
+</ul></li>
+<li>message passing over a graph
+<ul>
+<li>max-product belief propagation</li>
+</ul></li>
+<li>using methods from integer programming</li>
+<li>for some networks: graph-cut methods</li>
+<li>combinatorial search</li>
+</ul>
 <!-- rnb-text-end -->
+</div>
 
-<div id="rmd-source-code">LS0tCnRpdGxlOiAiTm90ZXMgUHJvYmFiaWxpc3RpYyBHcmFwaGljYWwgTW9kZWxzIDI6IEluZmVyZW5jZSIKb3V0cHV0OiBodG1sX25vdGVib29rCi0tLQo=</div>
+<div id="rmd-source-code">LS0tCnRpdGxlOiAiTm90ZXMgUHJvYmFiaWxpc3RpYyBHcmFwaGljYWwgTW9kZWxzIDI6IEluZmVyZW5jZSIKb3V0cHV0OiBodG1sX25vdGVib29rCi0tLQoKIyBPdmVydmlldzogQ29uZGl0aW9uYWwgUHJvYmFiaWxpdHkgUXVlcmllcwoKLSBFdmlkZW5jZTogJEUgPSBlJAotIFF1ZXJ5OiBhIHN1YnNldCBvZiB2YXJpYWJsZXMgJFkkCi0gVGFza3M6IGNvbXB1dGUgJFAoWSBcbWlkIEUgPSBlKSQKCk5QLWhhcmQgcHJvYmxlbXM6CgotIEdpdmVuIGEgUEdNICRQX1xwaGkkLCBhIHZhcmlhYmxlICRYJCBhbmQgYSB2YWx1ZSAkeCBcaW4gVmFsKFgpJCwgY29tcHV0ZQogICRQX1xwaGkoWCA9IHgpJCAoaS5lLiBjb21wdXRpbmcgYW4gZXhhY3QgcHJvYmFiaWxpdHkgZm9yIGEgc2ltcGxlIGV2ZW50KS4KICAtIE9yIGV2ZW4gZGVjaWRlIGlmICRQX1xwaGkoWCA9IHgpID4gMCQuCi0gU2FtZSBoYXBwZW5zIHdpdGggbWFueSB2ZXJzaW9ucyBvZiBhcHByb3hpbWF0aW9uLgoKSW4gbWFueSBjYXNlcyBvbmUgY2FuIGVmZmVjY2llbnRseSBnZXQgcmVzdWx0cy4KClN1bS1Qcm9kdWN0IGZvciAkUChZIFxtaWQgRSA9IGUpJDogc3VtIG92ZXIgcHJvZHVjdCBvZiBmYWN0b3JzIHRvIGdldCBhIG1hcmdpbmFsCmRpc3RyaWJ1dGlvbi4gIEZvciBpbmNvcnBvcmF0aW5nIHRoZSBldmlkZW5jZTsgZmlyc3QgcmVkdWNlIHRoZSBmYWN0b3JzLiAgQ2FuCnJlbm9ybWFsaXplIGF0IHRoZSBlbmQsIHNvIG5vIG5lZWQgdG8gaW5jb3Jwb3JhdGUgcGFydGl0aW9uIGZuIGF0IHN0YXJ0LgoKUHVzaCBzdW1tYXRpb25zIGludG8gZmFjdG9yIHByb2R1Y3Q6CgotIHZhcmlhYmxlIGVsaW1pbmF0aW9uIChkeW5hbWljIHByb2dyYW1taW5nKQoKTWVzc2FnZSBwYXNzaW5nIG92ZXIgYSBncmFwaAoKLSBiZWxpZWYgcHJvcGFnYXRpb24KLSB2YXJpYXRpb25hbCBhcHByb3hpbWF0aW9ucwoKUmFuZG9tIHNhbXBsaW5nIGluc3RhbnRpYXRpb25zCgotIE1DTUMKLSBJbXBvcnRhbmNlIHNhbXBsaW5nCgojIE92ZXJ2aWV3OiBNQVAgSW5mZXJlbmNlCgpNYXhpbXVtIGEgUG9zdGVyaW9yaQoKLSBFdmlkZW5jZTogJEUgPSBlJAotIFF1ZXJ5OiAqYWxsKiBvdGhlciB2YXJpYWJsZXMgJFkgPSBce1hfMSwgXGxkb3RzLCBYX25cfSAtIEUkCi0gVGFrczogY29tcHV0ZSAkTUFQKFkgXG1pZCBFID0gZSkkLiAgTm90ZSB0aGF0IHRoZXJlIG1heSBiZSBtb3JlIHRoYW4gb25lCiAgcG9zc2libGUgc29sdXRpb24uCiAgCk5vdCBlcXVhbCB0byB0aGUgbWF4aW11bSBzdGVwd2lzZSByZWFjaGVkIGJ5IG1heGltaXNpbmcgbWFyZ2luYWxzLgoKTlAtaGFyZCBwcm9ibGVtczoKCi0gR2l2ZW4gYSBQR00gZmluZCB0aGUgam9pbnQgYXNzaWdubWVudCB3aXRoIHRoZSBoaWdoZXN0IHByb2JhYmlsaXR5LgotIEZpbmQgYW4gYXNzaWdubWVudCBleGNlZWRpbmcgYSBnaXZlbiBwcm9iYWJpbGl0eS4KCkluIG1hbnkgY2FzZXMgb25lIGNhbiBlZmZpY2llbnRseSBnZXQgcmVzdWx0cy4KCk1heC1Qcm9kdWN0IGZvciAkTUFQKFkgXG1pZCBFID0gZSkkOyBkZW5vbWluYXRvciBmb3Igbm9ybWFsaXppbmcgdy5yLnQuIGV2aWRlbmNlCmlzIGNvbnN0YW50LCBzbyBjYW4gbGVhdmUgaXQgb3V0LiAgSnVzdCB3b3JrIHdpdGggcmVkdWNlZCBmYWN0b3JzLiAgQWxzbyBjYW4KbGVhdmUgb3V0IHRoZSBwYXJ0aXRpb24gZnVuY3Rpb24gYWdhaW4uCgotIFB1c2ggbWF4aW1pemF0aW9uIGludG8gZmFjdG9yIHByb2R1Y3QKICAgIC0gdmFyaWFibGUgZWxpbWluYXRpb24KLSBtZXNzYWdlIHBhc3Npbmcgb3ZlciBhIGdyYXBoCiAgICAtIG1heC1wcm9kdWN0IGJlbGllZiBwcm9wYWdhdGlvbgotIHVzaW5nIG1ldGhvZHMgZnJvbSBpbnRlZ2VyIHByb2dyYW1taW5nCi0gZm9yIHNvbWUgbmV0d29ya3M6IGdyYXBoLWN1dCBtZXRob2RzCi0gY29tYmluYXRvcmlhbCBzZWFyY2g=</div>
 
 
 
