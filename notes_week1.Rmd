@@ -2,3 +2,66 @@
 title: "Notes Probabilistic Graphical Models 2: Inference"
 output: html_notebook
 ---
+
+# Overview: Conditional Probability Queries
+
+- Evidence: $E = e$
+- Query: a subset of variables $Y$
+- Tasks: compute $P(Y \mid E = e)$
+
+NP-hard problems:
+
+- Given a PGM $P_\phi$, a variable $X$ and a value $x \in Val(X)$, compute
+  $P_\phi(X = x)$ (i.e. computing an exact probability for a simple event).
+  - Or even decide if $P_\phi(X = x) > 0$.
+- Same happens with many versions of approximation.
+
+In many cases one can effecciently get results.
+
+Sum-Product for $P(Y \mid E = e)$: sum over product of factors to get a marginal
+distribution.  For incorporating the evidence; first reduce the factors.  Can
+renormalize at the end, so no need to incorporate partition fn at start.
+
+Push summations into factor product:
+
+- variable elimination (dynamic programming)
+
+Message passing over a graph
+
+- belief propagation
+- variational approximations
+
+Random sampling instantiations
+
+- MCMC
+- Importance sampling
+
+# Overview: MAP Inference
+
+Maximum a Posteriori
+
+- Evidence: $E = e$
+- Query: *all* other variables $Y = \{X_1, \ldots, X_n\} - E$
+- Taks: compute $MAP(Y \mid E = e)$.  Note that there may be more than one
+  possible solution.
+  
+Not equal to the maximum stepwise reached by maximising marginals.
+
+NP-hard problems:
+
+- Given a PGM find the joint assignment with the highest probability.
+- Find an assignment exceeding a given probability.
+
+In many cases one can efficiently get results.
+
+Max-Product for $MAP(Y \mid E = e)$; denominator for normalizing w.r.t. evidence
+is constant, so can leave it out.  Just work with reduced factors.  Also can
+leave out the partition function again.
+
+- Push maximization into factor product
+    - variable elimination
+- message passing over a graph
+    - max-product belief propagation
+- using methods from integer programming
+- for some networks: graph-cut methods
+- combinatorial search
