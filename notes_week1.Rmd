@@ -1,0 +1,4 @@
+---
+title: "Notes Probabilistic Graphical Models 2: Inference"
+output: html_notebook
+---
