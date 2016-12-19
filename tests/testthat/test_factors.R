@@ -41,3 +41,13 @@ test_that("factor_product", {
   f2 <- create_factor(c(1,2,3,4,5,6), list(c(2, 3), c(3,2)))
   expect_equal(factor_product(f1, f2)$vars, list(c(1,2), c(2,3), c(3,2)))
 })
+
+test_that("factor marg", {
+  fact <- create_factor(c(1,2,3,4,5,6), list(c(1,2), c(2,3)))
+  fm1 <- factor_marginaliztion(fact,3)
+  fm2 <- factor_marginaliztion(fact,2)
+  fm3 <- factor_marginaliztion(fact,1)
+  expect_equal(fm1$vals, c(1,2,3,4,5,6))
+  expect_equal(fm2$vals, c(9, 12))
+  expect_equal(fm3$vals, c(3, 7, 11))
+})

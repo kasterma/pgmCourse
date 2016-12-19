@@ -109,9 +109,37 @@ factor_product <- function(f1, f2) {
       f2$vals[assignment_to_index(ass2, f2$vars)]
   }
 
-  list(f1.map, f2.map, var_scopes, vars = mapply(c, var_ids, var_scopes, SIMPLIFY = FALSE), vals =vals)
+  create_factor(vals, mapply(c, var_ids, var_scopes, SIMPLIFY = FALSE))
 }
 
-library(testthat)
+#' Marginalize a factor
+#'
+#' @param fact input factor
+#' @param idx variable to marginalize out
+#'
+#' @return marginalized factor
+#' @export
+#'
+#' @examples
+#' fact <- create_factor(c(1,2,3,4,5,6), list(c(1,2), c(2,3)))
+#' fm1 <- factor_marginaliztion(fact,3)
+#' fm2 <- factor_marginaliztion(fact,2)
+#' fm3 <- factor_marginaliztion(fact,1)
+factor_marginaliztion <- function(fact, idx) {
+  var_ids <- var_ids(fact$vars)
+  if (!idx %in% var_ids)
+    fact
+  else {
+    i <- match(idx, var_ids)
+    var_scopes <- var_scopes(fact$vars)
+    vals <- numeric(prod(var_scopes[-i]))
+    for (j in seq_len(prod(var_scopes))) {
+      assignment <- index_to_assignment(j, fact$vars)
+      vals[assignment_to_index(assignment[-i], var_scopes[-i])] <-
+        vals[assignment_to_index(assignment[-i], var_scopes[-i])] + fact$vals[j]
+    }
+    create_factor(vals, mapply(c, var_ids[-i], var_scopes[-i], SIMPLIFY = FALSE))
+  }
+}
 
 
