@@ -17,7 +17,7 @@
 index_to_assignment <- function(idx, vars) {
   scope_sizes <- sapply(vars, pryr::f(x, x[2]))
   strides <- c(1, cumprod(scope_sizes))
-  i2a <- pryr::f(i, ((idx - 1) %/% strides[i]) %% strides[i + 1] + 1)
+  i2a <- pryr::f(i, ((idx - 1) %/% strides[i]) %% scope_sizes[i] + 1)
   sapply(seq_along(scope_sizes), i2a)
 }
 
