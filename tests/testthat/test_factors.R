@@ -20,3 +20,24 @@ test_that("factors test",{
   expect_error(create_factor(c(1,2), list(c(1,2), c(1,3))), regexp = "!anyDuplicated")
   expect_error(create_factor(c(1,2), list(c(1,2), c(2,3))), regexp = "prod")
   })
+
+test_that("factor_product", {
+  f1 <- create_factor(c(1,2,3), list(c(1, 3)))
+  f2 <- create_factor(c(1,2,3), list(c(2, 3)))
+  expect_equal(factor_product(f1, f2)$vars, list(c(1,3), c(2,3)))
+  expect_equal(factor_product(f1, f2)$vals, c(1,2,3,2,4,6,3,6,9))
+
+  f1 <- create_factor(c(1,2), list(c(1, 2)))
+  f2 <- create_factor(c(1,2,3), list(c(2, 3)))
+  expect_equal(factor_product(f1, f2)$vars, list(c(1,2), c(2,3)))
+  expect_equal(factor_product(f1, f2)$vals, c(1,2,2,4,3,6))
+
+  f1 <- create_factor(c(1,2,3,4,5,6), list(c(1, 2), c(2,3)))
+  f2 <- create_factor(c(1,2,3,4,5,6), list(c(2, 3), c(1,2)))
+  expect_equal(factor_product(f1, f2)$vars, list(c(1,2), c(2,3)))
+  expect_equal(factor_product(f1, f2)$vals, c(1,8,6,20,15,36))
+
+  f1 <- create_factor(c(1,2,3,4,5,6), list(c(1, 2), c(2,3)))
+  f2 <- create_factor(c(1,2,3,4,5,6), list(c(2, 3), c(3,2)))
+  expect_equal(factor_product(f1, f2)$vars, list(c(1,2), c(2,3), c(3,2)))
+})

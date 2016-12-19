@@ -1,3 +1,11 @@
+var_ids <- function(vars) {
+  sapply(vars, pryr::f(x, x[1]))
+}
+
+var_scopes <- function(vars) {
+  sapply(vars, pryr::f(x, x[2]))
+}
+
 #' Convert indices to assignments
 #'
 #' Note: this function accepts a sequence of indices as well, in this case it
@@ -15,7 +23,7 @@
 #' index_to_assignment(3, vars)
 #' index_to_assignment(c(2,4,5), vars)
 index_to_assignment <- function(idx, vars) {
-  scope_sizes <- sapply(vars, pryr::f(x, x[2]))
+  scope_sizes <- var_scopes(vars)
   strides <- c(1, cumprod(scope_sizes))
   i2a <- pryr::f(i, ((idx - 1) %/% strides[i]) %% scope_sizes[i] + 1)
   sapply(seq_along(scope_sizes), i2a)
@@ -38,7 +46,7 @@ index_to_assignment <- function(idx, vars) {
 #' assignment_to_index(c(1,1), vars)
 #' assignment_to_index(matrix(c(1,1, 3,2), nrow = 2, byrow = TRUE), vars)
 assignment_to_index <- function(assign, vars) {
-  scope_sizes <- sapply(vars, pryr::f(x, x[2]))
+  scope_sizes <- var_scopes(vars)
   strides <- c(1, cumprod(head(scope_sizes, n = -1)))
   as.vector((assign - 1) %*% strides + 1)
 }
@@ -52,12 +60,58 @@ assignment_to_index <- function(assign, vars) {
 #'   1 and 2, and the scope of factor 1 is of size 4, the scope of factor 2
 #'   is of size 3.
 #'
-#' @return
+#' @return the created factor
 #' @export
 #'
 #' @examples
+#' create_factor(c(1,2,3,4,5,6), list(c(1,2), c(2, 3)))
 create_factor <- function(vals, vars) {
-  stopifnot(!anyDuplicated(sapply(vars, pryr::f(x, x[1]))),
-            prod(sapply(vars, pryr::f(x, x[2])), length(vals)))
+  stopifnot(!anyDuplicated(var_ids(vars)),
+            prod(sapply(vars, pryr::f(x, x[2]))) == length(vals))
   list(vals = vals, vars = vars)
 }
+
+
+#' Product of factors
+#'
+#' @param f1 first factor
+#' @param f2 second factor
+#'
+#' @return product of the input factors
+#' @export
+#'
+#' @examples
+#' f1 <- create_factor(c(1,2,3,4,5,6), list(c(1, 2), c(2,3)))
+#' f2 <- create_factor(c(1,2,3,4,5,6), list(c(2, 3), c(3,2)))
+#' factor_product(f1, f2)
+factor_product <- function(f1, f2) {
+  f1.var_ids <- var_ids(f1$vars)
+  f1.var_scopes <- var_scopes(f1$vars)
+  f2.var_ids <- var_ids(f2$vars)
+  f2.var_scopes <- var_scopes(f2$vars)
+  var_ids <- union(f1.var_ids, f2.var_ids)
+  f1.map <- match(var_ids, f1.var_ids)
+  f1.imap <- match(f1.var_ids, var_ids)
+  f2.map <- match(var_ids, f2.var_ids)
+  f2.imap <- match(f2.var_ids, var_ids)
+  var_scopes <- ifelse(!is.na(f1.map), f1.var_scopes[f1.map], f2.var_scopes[f2.map])
+
+  vars <- mapply(c, var_ids, var_scopes, SIMPLIFY = FALSE)
+
+  vals <- numeric(prod(var_scopes))
+  for (idx in seq_len(prod(var_scopes))) {
+    assignment <- index_to_assignment(idx, vars)
+    ass1 <- assignment[f1.imap]
+    ass2 <- assignment[f2.imap]
+
+    vals[idx] <-
+      f1$vals[assignment_to_index(ass1, f1$vars)] *
+      f2$vals[assignment_to_index(ass2, f2$vars)]
+  }
+
+  list(f1.map, f2.map, var_scopes, vars = mapply(c, var_ids, var_scopes, SIMPLIFY = FALSE), vals =vals)
+}
+
+library(testthat)
+
+
