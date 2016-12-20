@@ -157,8 +157,12 @@ factor_marginaliztion <- function(fact, idx) {
 factor_reduction <- function(fact, idx, val) {
   var_ids <- var_ids(fact$vars)
   i <- match(idx, var_ids)
-  scopes <- var_scopes(fact$vars)
-  strides <- c(1,cumprod(scopes))
-  idxs <- rep(seq(1, scopes[i]), each = strides[i], length.out = prod(scopes))
-  create_factor(fact$vals[idxs == val], fact$vars[-i])
+  if (is.na(i)) {
+    fact
+  } else {
+    scopes <- var_scopes(fact$vars)
+    strides <- c(1,cumprod(scopes))
+    idxs <- rep(seq(1, scopes[i]), each = strides[i], length.out = prod(scopes))
+    create_factor(fact$vals[idxs == val], fact$vars[-i])
+  }
 }

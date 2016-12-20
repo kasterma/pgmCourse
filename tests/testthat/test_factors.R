@@ -58,4 +58,5 @@ test_that("factor reduction", {
   expect_equal(factor_reduction(fact, 1, 2), create_factor(c(2,4,6), list(c(2,3))))
   expect_equal(factor_reduction(fact, 2, 1), create_factor(c(1,2), list(c(1,2))))
   expect_equal(factor_reduction(fact, 2, 2), create_factor(c(3,4), list(c(1,2))))
+  expect_equal(factor_reduction(fact, 3, 2), fact)
 })
