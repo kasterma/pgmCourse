@@ -142,4 +142,23 @@ factor_marginaliztion <- function(fact, idx) {
   }
 }
 
-
+#' Reduce factor
+#'
+#' @param fact factor to be reduced
+#' @param idx index of variable on which to reduce
+#' @param val value of variable on which to reduce
+#'
+#' @return reduced factor
+#' @export
+#'
+#' @examples
+#' fact <- create_factor(c(1,2,3,4,5,6), list(c(1,2), c(2,3)))
+#' expect_equal(factor_reduction(fact, 1, 1), create_factor(c(1,3,5), list(c(2,3))))
+factor_reduction <- function(fact, idx, val) {
+  var_ids <- var_ids(fact$vars)
+  i <- match(idx, var_ids)
+  scopes <- var_scopes(fact$vars)
+  strides <- c(1,cumprod(scopes))
+  idxs <- rep(seq(1, scopes[i]), each = strides[i], length.out = prod(scopes))
+  create_factor(fact$vals[idxs == val], fact$vars[-i])
+}

@@ -51,3 +51,11 @@ test_that("factor marg", {
   expect_equal(fm2$vals, c(9, 12))
   expect_equal(fm3$vals, c(3, 7, 11))
 })
+
+test_that("factor reduction", {
+  fact <- create_factor(c(1,2,3,4,5,6), list(c(1,2), c(2,3)))
+  expect_equal(factor_reduction(fact, 1, 1), create_factor(c(1,3,5), list(c(2,3))))
+  expect_equal(factor_reduction(fact, 1, 2), create_factor(c(2,4,6), list(c(2,3))))
+  expect_equal(factor_reduction(fact, 2, 1), create_factor(c(1,2), list(c(1,2))))
+  expect_equal(factor_reduction(fact, 2, 2), create_factor(c(3,4), list(c(1,2))))
+})
