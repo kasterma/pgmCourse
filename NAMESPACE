@@ -2,4 +2,7 @@
 
 export(assignment_to_index)
 export(create_factor)
+export(factor_marginaliztion)
+export(factor_product)
+export(factor_reduction)
 export(index_to_assignment)

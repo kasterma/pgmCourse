@@ -65,3 +65,24 @@ leave out the partition function again.
 - using methods from integer programming
 - for some networks: graph-cut methods
 - combinatorial search
+
+# Variable Elimination Algorithm
+
+Apply evidence, then push in sums as far as they will go, then perform the
+sums.  Can do this in unnormalized context and normalize at the end.
+
+## Eliminate-Var Z
+
+- $\Phi' = \{ \phi \in \Phi \mid Z \in Scope(\phi) \}$
+- $\psi = \prod_{\phi \in \Phi'} \phi$
+- $\tau = \sum_Z \psi$
+- $\Phi := \Phi - \Phi' + \{\tau\}$
+
+## Variable Elimination Alg
+- reduce all factors by evidence, get a set of factors $\Phi$
+- for each non-query variable Z, run Eliminate-Var Z from $\Phi$
+- Multiply all remaining factors
+- Renormalize to get distributions
+
+# Complexity of Variable Elimination Algorithm
+
