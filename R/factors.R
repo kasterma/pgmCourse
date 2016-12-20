@@ -46,9 +46,13 @@ index_to_assignment <- function(idx, vars) {
 #' assignment_to_index(c(1,1), vars)
 #' assignment_to_index(matrix(c(1,1, 3,2), nrow = 2, byrow = TRUE), vars)
 assignment_to_index <- function(assign, vars) {
-  scope_sizes <- var_scopes(vars)
-  strides <- c(1, cumprod(head(scope_sizes, n = -1)))
-  as.vector((assign - 1) %*% strides + 1)
+  if (length(assign) == 0 && length(vars) == 0)
+    1
+  else {
+    scope_sizes <- var_scopes(vars)
+    strides <- c(1, cumprod(head(scope_sizes, n = -1)))
+    as.vector((assign - 1) %*% strides + 1)
+  }
 }
 
 
@@ -66,9 +70,13 @@ assignment_to_index <- function(assign, vars) {
 #' @examples
 #' create_factor(c(1,2,3,4,5,6), list(c(1,2), c(2, 3)))
 create_factor <- function(vals, vars) {
-  stopifnot(!anyDuplicated(var_ids(vars)),
-            prod(var_scopes(vars)) == length(vals))
-  list(vals = vals, vars = vars)
+  if (length(vals) == 1 & length(vars) == 0)
+    list(vals = vals, vars = vars)
+  else {
+    stopifnot(!anyDuplicated(var_ids(vars)),
+              prod(var_scopes(vars)) == length(vals))
+    list(vals = vals, vars = vars)
+  }
 }
 
 
