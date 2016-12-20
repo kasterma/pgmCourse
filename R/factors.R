@@ -25,7 +25,7 @@ var_scopes <- function(vars) {
 index_to_assignment <- function(idx, vars) {
   scope_sizes <- var_scopes(vars)
   strides <- c(1, cumprod(scope_sizes))
-  i2a <- pryr::f(i, ((idx - 1) %/% strides[i]) %% scope_sizes[i] + 1)
+  i2a <- function(i) ((idx - 1) %/% strides[i]) %% scope_sizes[i] + 1
   sapply(seq_along(scope_sizes), i2a)
 }
 
@@ -67,7 +67,7 @@ assignment_to_index <- function(assign, vars) {
 #' create_factor(c(1,2,3,4,5,6), list(c(1,2), c(2, 3)))
 create_factor <- function(vals, vars) {
   stopifnot(!anyDuplicated(var_ids(vars)),
-            prod(sapply(vars, pryr::f(x, x[2]))) == length(vals))
+            prod(var_scopes(vars)) == length(vals))
   list(vals = vals, vars = vars)
 }
 
@@ -153,7 +153,7 @@ factor_marginaliztion <- function(fact, idx) {
 #'
 #' @examples
 #' fact <- create_factor(c(1,2,3,4,5,6), list(c(1,2), c(2,3)))
-#' expect_equal(factor_reduction(fact, 1, 1), create_factor(c(1,3,5), list(c(2,3))))
+#' factor_reduction(fact, 1, 1)
 factor_reduction <- function(fact, idx, val) {
   var_ids <- var_ids(fact$vars)
   i <- match(idx, var_ids)
