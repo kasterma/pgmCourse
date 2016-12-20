@@ -1,9 +1,9 @@
 var_ids <- function(vars) {
-  sapply(vars, pryr::f(x, x[1]))
+  sapply(vars, function(x) x[1])
 }
 
 var_scopes <- function(vars) {
-  sapply(vars, pryr::f(x, x[2]))
+  sapply(vars, function(x) x[2])
 }
 
 #' Convert indices to assignments
