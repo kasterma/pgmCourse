@@ -21,11 +21,26 @@ test_that("factors test",{
   expect_error(create_factor(c(1,2), list(c(1,2), c(2,3))), regexp = "prod")
   })
 
-test_that("normalize factors", {
+test_that("normalization tests", {
   x <- create_factor(c(1,1,2,2), list(c(1,2), c(2,2)))
   expect_equal(normalize_factor(x),
                list(vals = c(0.166666666666667, 0.166666666666667,
                              0.333333333333333, 0.333333333333333),
+                    vars = list(c(1, 2), c(2, 2))))
+  expect_error(normalize_factor(create_factor(c(-1,2), list(c(1,2)))),
+               regexp = "all(fact$vals >= 0) is not TRUE", fixed = TRUE)
+  expect_error(normalize_factor(x, 1, 2, "a"),
+               regexp = "all(!is.na(cv_locs)) is not TRUE",
+               fixed = TRUE)
+  expect_equal(normalize_factor(x, 2),
+               list(vals = c(0.5, 0.5, 0.5, 0.5), vars = list(c(1, 2), c(2, 2))))
+  expect_equal(normalize_factor(x, 1),
+               list(vals = c(0.3333, 0.3333, 0.666, 0.666),
+                    vars = list(c(1, 2), c(2, 2))),
+               tolerance = 0.001)
+  # boundary case where we condition on all variables
+  expect_equal(normalize_factor(x, 2, 1),
+               list(vals = c(1, 1, 1, 1),
                     vars = list(c(1, 2), c(2, 2))))
 })
 

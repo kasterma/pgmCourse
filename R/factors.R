@@ -81,21 +81,43 @@ create_factor <- function(vals, vars) {
 
 #' Normalize factor
 #'
-#' Normalize a factor to be a probability distribution.
+#' Normalize a factor to be a probability distribution; can pass variables
+#' on which this distribution is to be conditioned.
 #'
 #' @param fact factor to normalize
+#' @param ... variables the probability is conditioned over
 #'
 #' @return normalized factor
 #' @export
 #'
 #' @examples
 #' x <- create_factor(c(1,1,2,2), list(c(1,2), c(2,2)))
-#' normalize_factor(x)
-normalize_factor <- function(fact) {
+#' normalize_factor(x)      # the joint distribution
+#' normalize_factor(x, 1)   # the conditional distribution on 2 conditioned on 1
+#' normalize_factor(x, 2)   # the ocnditional distribution on 1 conditioned on 2
+normalize_factor <- function(fact, ...) {
   stopifnot(all(fact$vals >= 0))
-  f2 <- fact
-  f2$vals <- f2$vals/sum(f2$vals)
-  f2
+
+  conditional_vars <- c(...)
+  cv_locs <- match(conditional_vars, var_ids(fact$vars))
+  stopifnot(all(!is.na(cv_locs)))
+
+  if (length(conditional_vars) == 0) {
+    fact$vals <- fact$vals/sum(fact$vals)
+  } else {
+    names(cv_locs) <- paste0("V", conditional_vars)
+    scope_sizes <- var_scopes(fact$vars)
+    strides <- c(1, cumprod(scope_sizes))
+    df <- data.frame(vals = fact$vals)
+    # add in the columns for the variables to condition over
+    for (var in names(cv_locs)) {
+      var_idx <- cv_locs[var]
+      df[[var]] <- rep(x = seq(1, scope_sizes[var_idx]), each = strides[var_idx], length.out = prod(scope_sizes))
+    }
+    df %<>% dplyr::group_by_(.dots = names(cv_locs)) %>% dplyr::mutate(vals = vals / sum(vals))
+    fact$vals <- df$vals
+  }
+  fact
 }
 
 #' Product of factors
