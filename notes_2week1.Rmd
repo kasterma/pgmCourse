@@ -1,6 +1,8 @@
 ---
-title: "Notes Probabilistic Graphical Models 2: Inference"
-output: html_notebook
+title: 'Notes Probabilistic Graphical Models 2: Inference'
+output:
+  html_notebook: default
+  pdf_document: default
 ---
 
 # Overview: Conditional Probability Queries
@@ -71,6 +73,19 @@ leave out the partition function again.
 Apply evidence, then push in sums as far as they will go, then perform the
 sums.  Can do this in unnormalized context and normalize at the end.
 
+```{r}
+library(igraph)
+library(pryr)
+
+# the standard student network
+G_student <- graph_from_literal(D -+ G, I -+ G, I-+ S, G -+ L)
+
+layout <- matrix(c(0,1, 1,0, 2,1, 3,0, 1,-1), ncol = 2, byrow = TRUE)
+plot(G_student, layout = layout)
+G_student
+```
+
+
 ## Eliminate-Var Z
 
 - $\Phi' = \{ \phi \in \Phi \mid Z \in Scope(\phi) \}$
@@ -86,3 +101,95 @@ sums.  Can do this in unnormalized context and normalize at the end.
 
 # Complexity of Variable Elimination Algorithm
 
+In computing $\psi_k(X_k) := \prod_{i=1}^{m} \phi_i$, per row multiply
+a value from each $\phi$, so get cost of $(m - 1) \cdot | \mathrm{Val}(X_k) |$
+multiplications.
+
+In computing $\tau_k(X_k - \{Z\}) := \sum_Z \psi_k(X_k)$, add every number in
+$\psi_k$ into one of values for $\tau_k$, so get a cost of $|\mathrm{Val}(X_k)|$
+additions.
+
+Write $N_k = |\mathrm{Val}(X_k)|$.
+
+Total number of factors used in the procedure is $\leq m + n$, where $m$ is
+the number of factors in the initial network (each used in at most one
+elimination step, after which $1$ new factor is introduced), and $n$ is the
+number of variables (upper bound on number of elimination steps).
+
+In Bayesian networks have one factor per variable, but in Markov networks can
+start with many more factors.
+
+- $N = \max(N_k) =$ size of the largest factor
+- Product operations $\sum_k (m_k - 1) N_k \leq N \sum_k (m_k - 1) \leq N (m + n)$
+- Sum operations $\leq \sum_k N_k \leq N n$
+- Total work is linear in $N$ and total number of factors ($\leq n + m$).  I.e.
+  linear in size of model (#factors, #variables) and size of the largest factor
+  generated.
+
+But the size of a factor is exponential in its scope: $N_k = O(d^{r_k})$ where
+$d = \max(|\mathrm{Val}(X_i)|)$, and $r_k = |X_k|$. And this is an opportunity
+for exponential blowup.  The size of the blowup depends heavily on the
+elimination ordering.
+
+# Graph-Based Perspective
+
+Moralize a graph from a Bayesian network: make edges undirected, and connect
+edges in v-structures (gives the induced Markov network for the given set of
+factors).
+
+As we eliminate variables, remove nodes and edges.  Sometimes need to add a
+fill edge, b/c a factor is introduced between nodes that were not connected
+before.  All of the nbs of a varialbe that is eliminated, are connected directly
+after.
+
+Induced graph $I_{\Phi, \alpha}$ over factors $\Phi$ and ordering $\alpha$:
+
+- Undirected graph
+- $X_i$ and $X_j$ are connected if they appeared in the same factor in a run of
+  the VE algorithm using $\alpha$ as the ordering.
+
+**Thm:** Every factor produced during VE is a clique in the induced graph.
+
+clique: maximal fully connected subgraph.
+
+**Thm:** Every (maximal) clique in the induced graph is a factor produced during
+VE.
+
+Proof: take a clique, look at first var from it to be eliminated.  AFter this
+no new nbds are added.  At the time is was eliminated it had all clique members
+as nbds.  That means it had factors involving all its nbds, e.g. it participated
+in factors with all these other nodes.  This means when we multiply them
+together, we have a factor with all of them. QED
+
+The *width of an induced graph* is the number of nodes in the largest clique in
+the graph minus 1.
+
+*Minimal induced width* of a graph $K$ is $\min_\alpha(\width(I_{K, \alpha}))$.
+
+Provides a lower bound on bst performance of VE to a model factorizing over $K$.
+
+# Finding Elimination Orderings
+
+**Thm:** For a graph $H$, determining whether there exists an elimination
+ordering for $H$ with induced width $\leq k$ is NP-complete.
+
+Note: even given the optimal ordering, inference may still be exponential.
+
+Greedy search using heuristic cost function (at each point, eliminate node
+with smallest cost).
+
+- min-neighbors: number of neighbors in the current graph
+- min-weight: weight (# values) of factor formed
+- min-fill: number of new fill edges
+- weighted min-fill: total weight of new fill edges (edge weight = product of
+  weights of the 2 nodes (weight of node: size of domain of associated var))
+
+**Thm:** the induced graph is triangulated.
+
+Proof: Towards a contradiction, take a set in a loop size greater than 3 that is not
+triangulated.  Look at the first variable to be eliminated.  Then a bridge, the
+fill edge, is introduced, which then in the induced graph was already present.
+QED
+
+Can find elimination ordering by finding a low-width triangulation of the
+original graph.
