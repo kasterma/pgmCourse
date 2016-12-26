@@ -3,4 +3,5 @@ packrat/lib*/
 .Rhistory
 .RData
 *.nb.html
+*.pdf
 man/
