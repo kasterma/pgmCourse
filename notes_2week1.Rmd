@@ -1,15 +1,31 @@
 ---
-title: 'Notes Probabilistic Graphical Models 2: Inference'
+title: 'Notes Probabilistic Graphical Models 2: Inference, Variable Elimination'
 output:
   html_notebook: default
   pdf_document: default
 ---
+```{r}
+library(devtools)
+devtools::load_all()
+```
 
 # Overview: Conditional Probability Queries
 
 - Evidence: $E = e$
 - Query: a subset of variables $Y$
 - Tasks: compute $P(Y \mid E = e)$
+
+Here is an example of a simple joint distribution on two binary variables, and
+some queries for different evidence.
+
+```{r}
+P_1 <- normalize_factor(create_factor(c(1,1,2,2), list(c(1,2), c(2,2))))
+normalize_factor(factor_reduction(P_1, 2, 1))
+normalize_factor(factor_reduction(P_1, 2, 2))
+normalize_factor(factor_reduction(P_1, 1, 1))
+normalize_factor(factor_reduction(P_1, 1, 2))
+```
+
 
 NP-hard problems:
 
