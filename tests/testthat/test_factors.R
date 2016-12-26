@@ -21,6 +21,14 @@ test_that("factors test",{
   expect_error(create_factor(c(1,2), list(c(1,2), c(2,3))), regexp = "prod")
   })
 
+test_that("normalize factors", {
+  x <- create_factor(c(1,1,2,2), list(c(1,2), c(2,2)))
+  expect_equal(normalize_factor(x),
+               list(vals = c(0.166666666666667, 0.166666666666667,
+                             0.333333333333333, 0.333333333333333),
+                    vars = list(c(1, 2), c(2, 2))))
+})
+
 test_that("factor_product", {
   f1 <- create_factor(c(1,2,3), list(c(1, 3)))
   f2 <- create_factor(c(1,2,3), list(c(2, 3)))

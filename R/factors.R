@@ -79,6 +79,24 @@ create_factor <- function(vals, vars) {
   }
 }
 
+#' Normalize factor
+#'
+#' Normalize a factor to be a probability distribution.
+#'
+#' @param fact factor to normalize
+#'
+#' @return normalized factor
+#' @export
+#'
+#' @examples
+#' x <- create_factor(c(1,1,2,2), list(c(1,2), c(2,2)))
+#' normalize_factor(x)
+normalize_factor <- function(fact) {
+  stopifnot(all(fact$vals >= 0))
+  f2 <- fact
+  f2$vals <- f2$vals/sum(f2$vals)
+  f2
+}
 
 #' Product of factors
 #'
