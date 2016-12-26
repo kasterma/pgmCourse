@@ -1,6 +1,7 @@
 ---
 title: 'Notes Probabilistic Graphical Models 2: Inference, Variable Elimination'
 output:
+  html_document: default
   html_notebook: default
   pdf_document: default
 ---
@@ -39,6 +40,126 @@ In many cases one can effecciently get results.
 Sum-Product for $P(Y \mid E = e)$: sum over product of factors to get a marginal
 distribution.  For incorporating the evidence; first reduce the factors.  Can
 renormalize at the end, so no need to incorporate partition fn at start.
+
+--------------------------------------------------------------------------------
+
+We'll show a couple of examples using the student network, with all variables
+binary.  D for difficulty of course (1 = easy, 2 = hard), G for grade in course
+(1 = low, 2 = high), I for student intelligence (1 = low, 2 = high), L for
+quality of letter (1 = not good, 2 = good), S for SAT score (1 = low, 2 = high).
+
+```{r}
+library(igraph)
+G_student <- graph_from_literal(D -+ G, I -+ G, I -+ S, G -+ L)
+
+layout <- matrix(c(0,1, 1,0, 2,1, 3,0, 1,-1), ncol = 2, byrow = TRUE)
+plot(G_student, layout = layout)
+```
+
+50% chance the course is hard
+
+```{r}
+d_D <- create_factor(c(0.5,0.5), list(c(1,2)))
+factor2df(d_D, names(V(G_student)))
+```
+
+90% change on intelligent student
+```{r}
+d_I <- create_factor(c(0.1, 0.9), list(c(3,2)))
+factor2df(d_I, names(V(G_student)))
+```
+
+```{r}
+d_G <- create_factor(c(0.5, 0.5, 0.8, 0.2, 0.2, 0.8, 0.4, 0.6),
+                     list(c(2,2), c(1,2), c(3,2)))
+factor2df(d_G, names(V(G_student)))
+```
+
+To see these are not unreasonable, notice that if we incorporate the efidence that the student is not
+smart we get
+```{r}
+factor2df(normalize_factor(factor_reduction(d_G, 3, 1), 1), names(V(G_student)))
+```
+
+Compared to the following which is if the student is smart
+
+```{r}
+factor2df(normalize_factor(factor_reduction(d_G, 3, 2), 1), names(V(G_student)))
+```
+
+And here is the grade distribution of a not smart student in a difficult course
+(80% probability on a low grade)
+
+```{r}
+factor2df(factor_reduction(factor_reduction(d_G, 3, 1), 1, 2), names(V(G_student)))
+```
+
+
+```{r}
+d_S <- create_factor(c(0.8, 0.2, 0.1, 0.9), list(c(4,2), c(3,2)))
+factor2df(d_S, names(V(G_student)))
+```
+
+For the letter you can see, a low grade leads to 80% probability of a bad
+latter, a high grade leads to 90% probability of a good letter.
+
+```{r}
+d_L <- create_factor(c(0.8, 0.2, 0.1, 0.9), list(c(5,2), c(2,2)))
+factor2df(d_L, names(V(G_student)))
+```
+
+With this we have distributions that look reasonable for all nodes in the
+student graph
+
+```{r}
+ds <- list(d_D, d_I, d_G, d_S, d_L)
+```
+
+Now we can compute some queries with the sum product method.
+
+First with no evidence, what is the distribution on grades?
+
+```{r}
+ds_red <- ds    # no reductions needed since no evidence
+d_prod <- Reduce(factor_product, ds_red)
+factor2df(d_prod, names(V(G_student)))    ## full intermediate factor
+a <- Reduce(factor_marginaliztion, c(1,3,4,5), d_prod)
+factor2df(a, names(V(G_student)))
+```
+
+67% probability on a good grade.  What is the student is not so smart?
+
+```{r}
+ds_red <- lapply(ds, function(fact) factor_reduction(fact, 3, 1))
+d_prod <- Reduce(factor_product, ds_red)
+a <- normalize_factor(Reduce(factor_marginaliztion, c(1,4,5), d_prod))
+factor2df(a, names(V(G_student)))
+```
+
+65% probability on a bad grade.
+
+What is the student is not so smart, but the course is easy?
+
+```{r}
+ds_red <- lapply(ds, function(fact) factor_reduction(factor_reduction(fact, 3, 1), 1, 1))
+d_prod <- Reduce(factor_product, ds_red)
+a <- normalize_factor(Reduce(factor_marginaliztion, c(1,4,5), d_prod))
+factor2df(a, names(V(G_student)))
+```
+
+50% probability on a good grade, a 15% rise versus an arbitrary course.  If the
+course is hard however.
+
+```{r}
+ds_red <- lapply(ds, function(fact) factor_reduction(factor_reduction(fact, 3, 1), 1, 2))
+d_prod <- Reduce(factor_product, ds_red)
+a <- normalize_factor(Reduce(factor_marginaliztion, c(1,4,5), d_prod))
+factor2df(a, names(V(G_student)))
+```
+
+80% probability on a bad grade.
+
+--------------------------------------------------------------------------------
 
 Push summations into factor product:
 
