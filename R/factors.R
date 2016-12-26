@@ -120,6 +120,40 @@ normalize_factor <- function(fact, ...) {
   fact
 }
 
+#' Expand factor to data.frame
+#'
+#' Generate a data frame with the information in a factor; format is such
+#' that it allows for easy printing.
+#'
+#' @param fact factor to be converted
+#' @param var_names vector of variable names; the names used are extracted using
+#'     the variable indices from this.  If missing generate some variable names.
+#'
+#' @return data.frame with all info from the factor
+#' @export
+#'
+#' @examples
+factor2df <- function(fact, var_names) {
+  var_ids <- var_ids(fact$vars)
+  if (missing(var_names))
+    var_names <- paste0("variable-", var_ids)
+  else
+    var_names <- var_names[var_ids]
+    stopifnot(all(!is.na(var_names)))
+  scope_sizes <- var_scopes(fact$vars)
+  names(scope_sizes) <- var_names
+  strides <- c(1, cumprod(scope_sizes))
+  names(strides) <- var_names
+
+  df <- data.frame(vals = fact$vals)
+  for (var in var_names) {
+    df[[var]] <- rep(x = seq(1, scope_sizes[var]),
+                     each = strides[var],
+                     length.out = length(fact$vals))
+  }
+  df
+}
+
 #' Product of factors
 #'
 #' @param f1 first factor
