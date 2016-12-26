@@ -143,8 +143,8 @@ factor_marginaliztion <- function(fact, idx) {
     vals <- numeric(prod(var_scopes[-i]))
     for (j in seq_len(prod(var_scopes))) {
       assignment <- index_to_assignment(j, fact$vars)
-      vals[assignment_to_index(assignment[-i], var_scopes[-i])] <-
-        vals[assignment_to_index(assignment[-i], var_scopes[-i])] + fact$vals[j]
+      vals[assignment_to_index(assignment[-i], fact$vars[-i])] <-
+        vals[assignment_to_index(assignment[-i], fact$vars[-i])] + fact$vals[j]
     }
     create_factor(vals, mapply(c, var_ids[-i], var_scopes[-i], SIMPLIFY = FALSE))
   }
