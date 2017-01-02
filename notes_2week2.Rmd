@@ -1,0 +1,113 @@
+---
+title: 'Notes Probabilistic Graphical Models 2: Inference, Belief Propagation Algorithms'
+output:
+  html_document: default
+  html_notebook: default
+  pdf_document: default
+---
+
+```{r}
+library(devtools)
+devtools::load_all()
+```
+
+# Message Passing; Belief propagation algrithm
+
+From graphical mode, create cluster graph.
+
+Initialize with factors.
+
+Start with uninformative message
+
+Def: **cluster graph** an undirected gaph 
+
+- the nodes are $C_i \subseteq \{X_1, \ldots, X_n\}$ with the $X_i$ nodes of
+  the original graph, and
+- an edge is associated with setsep $S_{i,j} \subseteq X_i \cap X_j$.
+
+Given a set of factors $\Phi$ assign each $\phi_k \in \Phi$ to a cluster
+$C_{\alpha(k)}$ s.t. $\mathrm{Scope}(\phi_k) \subseteq C_{\alpha(k)}$.
+
+- Need every bit of evidence taken into account, hence every factor needs to
+  be in at least one cluster,
+- but also need every bit of evidence to be taken into account only once (o/w
+  I tell you a rumour, and then believe it more when you tell it back to me),
+  hence assign to at most one cluster.
+- a cluster can have multiple factors assigned to it.
+
+Def: the initial potential of the cluster
+
+   $$\psi_i(C_i) = \prod_{k: \alpha(k) = i} \phi_k$$ 
+
+Def: the messages are of the form
+   $$\delta_{i \rightarrow j}(S_{i,j}) =
+      \sum_{C_i \setminus S_{i,j}}\psi_i
+        \prod_{k \in \mathcal{N}_i -\{j\}} \delta_{k \rightarrow i}$$
+
+Belief propagation algorithm now repeats:
+
+- choose an edge
+- pass the message along that edge
+
+Finally compute
+
+   $$\beta_i(C_i) = \psi_i \prod_{k \in \mathcal{N}_i} \delta_{k \rightarrow i}$$
+
+- repeat until when?
+- how to select edges?
+- in general this is an approximate solution.
+
+# Cluster Graph Properties
+
+Family preservation: for very factor $\phi$ there is a cluster $C_i$ with
+$\mathrm{Scope}(\phi) \subseteq C_i$.
+
+Running intersection property: for each pair of cluster $C_i, C_j$ and $X \in
+C_i \cap C_j$ there is a unique path between $C_i$ and $C_j$ for which all
+clusters and sepsets contain $X$.
+
+- existence so that there can not be isolated parts of the graph with information
+  about $X$ that don't pass messages about $X$.
+- uniqueness needed so that a belief doesn't reinforce itself by having a
+  self reinforcing loop.
+
+Note: if $X$ and $Y$ are very correlated we can still have things that are
+close to such loops.  This is one of the problems with belief propagation.
+
+RIP is equivalent to the statement that for any $X$ the set of clusters and
+sepsets that contain $X$ form a tree.
+
+TODO: implement message passing; create example where RIP failing causes a
+problem.
+
+## Bethe Cluster Graph
+
+Often used, but in some sense degenerate.
+
+- big clusters: $C_i = \mathrm{Scope}(\phi_i)$ for each factor $\phi_i$.
+- little cluster: for each variable $X_i$ a cluster $\{X_i\}$.
+- edge: $C_k \leftrightarrow X_i$ iff $X_i \in C_k$.
+
+Always bipartite.  No information passed about correlations between variables.
+
+## Properties of belief propagation
+
+A cluster graph is **calibrated** iff every pair of adjacent clusters $C_i, C_j$
+agree on the belief about their sepset $S_{i,j}$:
+
+   $$\sum_{C_i \setminus S_{i,j}} \beta_i(C_i) =
+      \sum_{C_j \setminus S_{i,j}} \beta_j(C_j)$$
+
+Convergence of the algorithm (message is the same as the previous message)
+implies calibration.
+  $$\mu_{i,j} = \delta_{i \rightarrow j} \delta_{j \rightarrow i} =
+     \sum_{C_j \setminus S_{i,j}} \beta_j $$
+
+Reparametrization; by doing the message passing algorithm, no information
+has been lost
+
+  $$ \frac{\prod \beta_i}{\prod \mu_{i,j}} = \tilde{P}$$
+  
+remember $\tilde{P}$ is the original unnormalized measure (product of the
+factors); see this from the fact every message appears once in a $\beta_i$ and
+once in a $\mu_{i,j}$, and every factor appears once is a $\beta_i$.
