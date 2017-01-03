@@ -111,3 +111,79 @@ has been lost
 remember $\tilde{P}$ is the original unnormalized measure (product of the
 factors); see this from the fact every message appears once in a $\beta_i$ and
 once in a $\mu_{i,j}$, and every factor appears once is a $\beta_i$.
+
+## Clique Tree Algorithm and Correctness
+
+Clique tree is a special case of a cluster graph, but has better performance
+guarantees for message passing: faster convergence and convergence to correct
+answer.
+
+Message passing in a tree gives correct beliefs; very close to variable
+elimination.
+
+Def: **Clique Tree** is an undirected tree such that
+
+- nodes are clusters $C_i \subseteq \{X_1, \ldots, X_n\}$,
+- edge between $C_i$ and $C_j$ has sepset $S_{i,j} = C_i \cap C_j$.
+
+Family preservation, Running Intersection Property.  The running intersection
+property can be rewritten for trees into: for each pair of clusters $C_i$ and
+$C_j$ and each $X \in C_i \cap C_j$ in the unique path between $C_i$ and $C_j$
+all clusters and sepsets contain $X$.
+
+RIP (+ family preservation) => Clique tree correctness.
+  
+- when a variable $X$ is eliminated from a message, then $X$ does not appear
+  in the subtree the message was passed to.
+- this gives that the correspondence with variable elimination works.
+
+## Clique Tree Algorithm: Computation
+
+Messages from leaf nodes have converged once computed.  Other nodes should
+wait until they get a message before passing a message on.  Wait for all but
+one, and then pass on.
+
+For chains this is called the forward-backward algorithm.
+
+- Once $C_i$ recieves a final message from all its neighbors except for $C_j$,
+  then the message computed to send to $C_j$ is also final.
+- Message from a leaf is always final.
+- If we pass the messages in the right order, need to pass only $2 (k-1)$
+  messages ($k$ = number of clusters).
+
+Answering queries:
+
+- if about a posterior distribution all of whose variables appear in one
+  clique, can sum out the additional variables appearin in that clique to get
+  the posterior (unnormalized) distribution.
+- if introducing some new evidence $Z=z$ and querying $X$
+  - if $X$ appears in clique with $Z$: just reduce the factor, and normalize.
+  - if $X$ and $Z$ are not in the same clique: then reduce a factor containing
+    $Z$ (can reuse many of the massages that were send/computed before).
+
+We can compute all the marginals at only twice the cost of variable elimination,
+then storing the messages we can reuse many of them in incremental queries.
+
+## Clique Tree and Independence
+
+Since clique trees appear so efficient, but we know inference is hard, need
+to understand where the difficulty lies.
+
+For an edge $(i,j) \in T$ let $W_{<(i,j)}$ be all variables that appear only on
+the $C_i$ side of $T$.  Variables on both sides are in the sepset $S_{i,j}$.
+
+Thm: $T$ satisfies RIP iff for every edge $(i,j) \in T$ we have
+$$P_\Phi \models (W_{<(i,j)} \perp W_{<(j,i)} \mid S_{i,j}).$$
+
+Assume not.  Then there is a path in the induced Markov network from the one
+side to the other.  Then there is some edge that goes from the one side to the
+other side.  But this means there is a factor with a variable from the left side,
+and one from the right side.  This contradicts family preservation.
+
+Each sepset needs to separate the graph into two conditionally independent
+parts.
+
+In a complete bipartite graph, need a whole side in a sepset.
+
+Rectangular grid graph; need a setset size of a side.  This is where we pay,
+clique trees have large sepsets.
