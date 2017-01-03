@@ -31,3 +31,21 @@ bethe <- function(factors) {
   }
   g
 }
+
+result_df <- data.frame(from = I(list(c("1", "2"), c("1", "2"), c("2", "3"), c("2", "3"),
+                                      c("1", "4"), c("1", "4"))),
+                        to = I(list("1", "2", "2", "3", "1", "4")))
+expect_equal(as_data_frame(bethe(Phi)), result_df, check.attributes = FALSE)
+
+expect_equal(as_data_frame(bethe(Phi)),
+             structure(list(from = list(c("1", "2"), c("1", "2"),
+                                        c("2", "3"), c("2", "3"),
+                                        c("1", "4"), c("1", "4")),
+                            to = list("1", "2", "2", "3", "1", "4")),
+                       .Names = c("from", "to"),
+                       class = "data.frame", row.names = c(NA,
+                                                           6L)))
+xx <- list(from = list(c("1", "2"), c("1", "2"),
+                       c("2", "3"), c("2", "3"),
+                       c("1", "4"), c("1", "4")),
+           to = list("1", "2", "2", "3", "1", "4"))
