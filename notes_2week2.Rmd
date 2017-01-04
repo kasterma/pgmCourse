@@ -187,3 +187,96 @@ In a complete bipartite graph, need a whole side in a sepset.
 
 Rectangular grid graph; need a setset size of a side.  This is where we pay,
 clique trees have large sepsets.
+
+## Clique Trees and VE
+
+How to contruct a clique tree; from a run of VE create a clique tree.
+
+VE:
+
+- each step create a factor $\lambda_i$ through factor product
+- eliminate a variable in $\lambda_i$ to generate a new factor $\tau_i$
+- $\tau_i$ is used in computing other factors $\lambda_j$
+
+Clique tree view:
+
+- $\lambda_i$ are cliques
+- $\tau_i$ messages created by clique $\lambda_i$ and transmitted to other
+  cliques
+  
+Graph:
+
+- a cluster $C_i$ for each factor $\lambda_i$ used in the computation,
+- an edge $C_i \leftrightarrow C_j$ if the factor generated $\lambda_i$ is used
+  in the computation $\lambda_j$.
+
+No value in having neighboring nodes that are subsets of eachother; can
+postprocess to remove these.
+
+Produces a tree: every intermediate factor is used only once.
+
+Family preserving: each of the original factors is used somewhere in VE process.
+
+Thm: if $T$ is a tree of clusters produced by VE, then $T$ obeys RIP (tree is
+directed by construction).
+
+A variable $X$ is eliminated in exactly one step, look at that step.  No step
+after involves $X$. Look at any cluster before that has $X$, but then it is
+in the sepset leaving that cluster.  Then also it is in the cluster that message
+is send to.
+
+Note: can simulate the running of VE, we don't have to actually do the factor
+products and marginalisations.  Cost of variable elimination is about the same
+as passing messages in one direction of the tree.  But with storing messages
+we can do inference after efficiently (initial run twice as expensive, but then
+can do this inference)
+
+## BP in practice
+
+Misconception example: tight loops, strong potentials, conflicting directions.
+This is a situation where both convergence and accuracy are not good.
+
+*Not to do*: synchronous BP, all messages are updated in parallel.  Ising grid
+example.
+
+Asynchronous BP (still need to choose an order); messages are updated one at
+a time.
+
+Asynxhronous order 2 in Ising grid example; much better.
+
+- Convergence is a local property (some converge quickly, others may never
+  converge)
+- Synchronous worse than asynchronous.
+- Message passing order makes a difference
+
+Tree reparametrization (TRP).  Pick a tree and pass messages to calibrate.  Then
+pick different tree, calibrate.  Ensure the trees cover all edges.  The
+performance is improved with larger trees (e.g. pick spanning trees).
+
+Residual belief propagation (RBP).  Pass messages between two clusters whose
+beliefs over the sepset disagree the most.  Use priority queue of edges.
+
+Smoothing (Damping) Messages.  $\delta_{i \rightarrow j} = \sum_{C_i \setminus
+S_{i,j} \psi_i \prod_{k \neq j} \delta_{k \rightarrow i}}$, replace by
+$\delta_{i \rightarrow j} = \lambda \left( \sum_{C_i \setminus
+S_{i,j} \psi_i \prod_{k \neq j} \delta_{k \rightarrow i}} \right) + (1 - \lambda)
+\delta^\text{old}_{i \rightarrow j}$.
+
+## Loopy BP and Message Decoding
+
+$U_1, \ldots, U_k$ bits to send over noisy channel.  First encode them into
+$X_1, \ldots, X_n$ which can be passed over the noisy channel such that
+after decoding to $V_1, \ldots, V_k$ we get the original bits with good probability.
+
+Rate: $k/n$
+
+Bit error rate: $\frac{1}{k} \sum_i P(V_i \neq U_i)$
+
+Type of channel: binary symmetric channel, binary erasure channel, gaussian
+channel (add analog noise).  These different types of channel have very
+different capacity.
+
+Shannen's Theorem.
+
+Turbo codes; two encoders and decoders, where the decoders communicate their
+computed probabilities iteratively.
